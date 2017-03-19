@@ -27,6 +27,7 @@ void simulate(std::string filePath, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats);
+void printSummary(BranchStats *stats);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -83,9 +84,7 @@ void simulate(std::string filePath, bool verbose) {
     }
     traceFile.close();
 
-    std::cout << stats.branches << " " << stats.forwardBranches << " ";
-    std::cout << stats.forwardBranchesTaken << " " << stats.backwardBranches;
-    std::cout << " " << stats.backwardBranchesTaken << std::endl; 
+    printSummary(&stats);
 }
 
 void parseLine(std::string *line, TraceInfo *trace) {
@@ -123,4 +122,24 @@ void evaluate(TraceInfo *trace, BranchStats *stats) {
             stats->misprediction += 1;
         }
     }
+}
+
+void printSummary(BranchStats *stats) {
+    using namespace std;
+    double mispredicitonRate;
+
+    mispredicitonRate = static_cast<double>(stats->misprediction)
+        / stats->branches;
+
+    cout << "Number of branches = " << stats->branches << endl;
+    cout << "Number of forward branches = ";
+    cout << stats->forwardBranches << endl;
+    cout << "Number of forward taken branches = ";
+    cout << stats->forwardBranchesTaken << endl;
+    cout << "Number of backward branches = ";
+    cout <<  stats->backwardBranches << endl;
+    cout << "Number of backward taken branches = ";
+    cout << stats->backwardBranchesTaken << endl;
+    cout << "Number of mispredictions = ";
+    cout << stats->misprediction << " " << mispredicitonRate << endl;
 }
