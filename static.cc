@@ -13,10 +13,10 @@ typedef struct TraceLineDetail {
 
 typedef struct BranchStatistics {
     unsigned int branches;
-    unsigned int forwardBranches;
-    unsigned int forwardBranchesTaken;
-    unsigned int backwardBranches;
-    unsigned int backwardBranchesTaken;
+    unsigned int forward;
+    unsigned int forwardTaken;
+    unsigned int backward;
+    unsigned int backwardTaken;
     unsigned int misprediction;
 } BranchStats;
 
@@ -107,17 +107,17 @@ void evaluate(TraceInfo *trace, BranchStats *stats) {
 
     stats->branches += 1;
     if (forwardBranch) {
-        stats->forwardBranches += 1;
+        stats->forward += 1;
 
         if (branchTaken) {
-            stats->forwardBranchesTaken += 1;
+            stats->forwardTaken += 1;
             stats->misprediction += 1;
         }
     } else if (backwardBranch) {
-        stats->backwardBranches += 1;
+        stats->backward += 1;
 
         if (branchTaken) {
-            stats->backwardBranchesTaken += 1;
+            stats->backwardTaken += 1;
         } else {
             stats->misprediction += 1;
         }
@@ -133,13 +133,13 @@ void printSummary(BranchStats *stats) {
 
     cout << "Number of branches = " << stats->branches << endl;
     cout << "Number of forward branches = ";
-    cout << stats->forwardBranches << endl;
+    cout << stats->forward << endl;
     cout << "Number of forward taken branches = ";
-    cout << stats->forwardBranchesTaken << endl;
+    cout << stats->forwardTaken << endl;
     cout << "Number of backward branches = ";
-    cout <<  stats->backwardBranches << endl;
+    cout <<  stats->backward << endl;
     cout << "Number of backward taken branches = ";
-    cout << stats->backwardBranchesTaken << endl;
+    cout << stats->backwardTaken << endl;
     cout << "Number of mispredictions = ";
     cout << stats->misprediction << " " << mispredicitonRate << endl;
 }
