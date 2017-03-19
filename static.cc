@@ -11,9 +11,12 @@ typedef struct TraceLineDetail {
     bool branchTaken;
 } TraceInfo;
 
+const unsigned short CONDITIONAL_BRANCH = 1;
+
 void usage(char *baseName);
 void simulate(std::string filePath, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
+void printLine(TraceInfo *trace);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -61,7 +64,10 @@ void simulate(std::string filePath, bool verbose) {
     while(std::getline(traceFile, line)) {
         TraceInfo trace;
         parseLine(&line, &trace);
-    
+        
+        if(verbose && trace.branchType == CONDITIONAL_BRANCH) {
+            std::cout << line << std::endl;
+        }
     }
     
     traceFile.close();
