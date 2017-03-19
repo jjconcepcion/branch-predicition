@@ -4,10 +4,18 @@
 #include <sstream>
 #include <unistd.h> // getopt()
 
+typedef struct TraceLineDetail {
+    unsigned int programCounter;
+    unsigned short branchType;
+    unsigned int targetAddress;
+    bool branchTaken;
+} TraceInfo;
+
 void usage(char *baseName);
 void simulate(std::string filePath, bool verbose);
+void parseLine(std::string *line, TraceInfo *trace);
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
     std::string traceFilePath;
     bool vflag = false;   // verbose mode flag
     int option;
@@ -43,9 +51,6 @@ void usage(char *baseName) {
 void simulate(std::string filePath, bool verbose) {
     std::ifstream traceFile;
     std::string line;
-    unsigned int programCounter, targetAddress;
-    unsigned short branchType;
-    bool branchTaken;
     
     traceFile.open(filePath);
     if (traceFile.fail()) {
@@ -54,15 +59,19 @@ void simulate(std::string filePath, bool verbose) {
     }
     
     while(std::getline(traceFile, line)) {
-        std::stringstream sstream(line);
-        sstream >> std::hex >> programCounter;
-        sstream >> std::dec >> branchType;
-        sstream >> std::hex >> targetAddress;
-        sstream >> std::dec >> branchTaken;
-        
-        std::cout << programCounter << " " << branchType << " ";
-        std::cout << targetAddress << " " << branchTaken << std::endl;
+        TraceInfo trace;
+        parseLine(&line, &trace);
+    
     }
     
     traceFile.close();
+}
+
+void parseLine(std::string *line, TraceInfo *trace) {
+    std::stringstream sstream(*line);
+    
+    sstream >> std::hex >> trace->programCounter;
+    sstream >> std::dec >> trace->branchType;
+    sstream >> std::hex >> trace->targetAddress;
+    sstream >> std::dec >> trace->branchTaken;
 }
