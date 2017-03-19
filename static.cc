@@ -11,12 +11,22 @@ typedef struct TraceLineDetail {
     bool branchTaken;
 } TraceInfo;
 
+typedef struct BranchStatistics {
+    unsigned int branches;
+    unsigned int forwardBranches;
+    unsigned int forwardBranchesTaken;
+    unsigned int backwardBranches;
+    unsigned int backwardBranchesTaken;
+    unsigned int misprediction;
+} BranchStats;
+
 const unsigned short CONDITIONAL_BRANCH = 1;
 
 void usage(char *baseName);
 void simulate(std::string filePath, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
+void evaluate(TraceInfo *trace, BranchStats *stats);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -54,6 +64,7 @@ void usage(char *baseName) {
 void simulate(std::string filePath, bool verbose) {
     std::ifstream traceFile;
     std::string line;
+    BranchStats stats = {0};
     
     traceFile.open(filePath);
     if (traceFile.fail()) {
@@ -64,13 +75,17 @@ void simulate(std::string filePath, bool verbose) {
     while(std::getline(traceFile, line)) {
         TraceInfo trace;
         parseLine(&line, &trace);
+        evaluate(&trace, &stats);
         
-        if(verbose && trace.branchType == CONDITIONAL_BRANCH) {
+        if (verbose && trace.branchType == CONDITIONAL_BRANCH) {
             std::cout << line << std::endl;
         }
     }
-    
     traceFile.close();
+
+    std::cout << stats.branches << " " << stats.forwardBranches << " ";
+    std::cout << stats.forwardBranchesTaken << " " << stats.backwardBranches;
+    std::cout << " " << stats.backwardBranchesTaken << std::endl; 
 }
 
 void parseLine(std::string *line, TraceInfo *trace) {
@@ -80,4 +95,32 @@ void parseLine(std::string *line, TraceInfo *trace) {
     sstream >> std::dec >> trace->branchType;
     sstream >> std::hex >> trace->targetAddress;
     sstream >> std::dec >> trace->branchTaken;
+}
+
+void evaluate(TraceInfo *trace, BranchStats *stats) {
+    if(trace->branchType != CONDITIONAL_BRANCH) {
+        return;
+    }
+
+    bool branchTaken = trace->branchTaken;
+    bool forwardBranch = (trace->programCounter < trace->targetAddress);
+    bool backwardBranch = !forwardBranch;
+
+    stats->branches += 1;
+    if (forwardBranch) {
+        stats->forwardBranches += 1;
+
+        if (branchTaken) {
+            stats->forwardBranchesTaken += 1;
+            stats->misprediction += 1;
+        }
+    } else if (backwardBranch) {
+        stats->backwardBranches += 1;
+
+        if (branchTaken) {
+            stats->backwardBranchesTaken += 1;
+        } else {
+            stats->misprediction += 1;
+        }
+    }
 }
