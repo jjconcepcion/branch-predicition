@@ -68,7 +68,7 @@ void simulate(std::string filePath, bool verbose) {
     std::string line;
     BranchStats stats = {0};
     
-    traceFile.open(filePath);
+    traceFile.open(filePath.c_str(), std::ifstream::in);
     if (traceFile.fail()) {
         std::cerr << "Error: failed to open: " << filePath << std::endl;
         exit(1);
