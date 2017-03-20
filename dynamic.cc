@@ -34,6 +34,8 @@ int main(int argc, char *argv[]) {
     std::string traceFilePath;
     bool vflag = false;   // verbose mode flag
     int option;
+    unsigned int pbSize;    // size of prediction buffer
+    unsigned int btbSize;  // size of branch target buffer
     
     // parse command line args
     while ((option = getopt(argc, argv, "v")) != -1) {
@@ -47,12 +49,14 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    if (optind >= argc) {
+    if ((optind + 2) >= argc) {
         usage(argv[0]);
         exit(1);
     }
     
     traceFilePath = argv[optind];
+    pbSize = atoi(argv[optind + 1]);
+    btbSize = atoi(argv[optind + 2]);
     
     simulate(traceFilePath, vflag);
     
@@ -60,7 +64,16 @@ int main(int argc, char *argv[]) {
 }
 
 void usage(char *baseName) {
-    std::cerr << "Usage: " << baseName << " [-v] TRACE_FILE" << std::endl;
+    std::cerr << "Usage: " << baseName << " [-v] TRACE_FILE ";
+    std::cerr << "PB_SIZE BTB_SIZE" << std::endl;
+    std::cerr << "Option:" << std::endl;
+    std::cerr << "\t-v,\tverbose mode" << std::endl;
+    std::cerr << "Arguments:" << std::endl;
+    std::cerr << "\tTRACE_FILE: path to trace file" << std::endl;
+    std::cerr << "\tPB_SIZE: size of prediction buffer (power of 2)";
+    std::cerr << std::endl;
+    std::cerr << "\tBTB_SIZE: size of taget buffer (power of 2)" << std::endl;
+
 }
 
 void simulate(std::string filePath, bool verbose) {
