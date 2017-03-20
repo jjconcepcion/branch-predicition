@@ -28,6 +28,8 @@ typedef struct BranchTargetBufferEntry {
 } BtbEntry;
 
 const unsigned short CONDITIONAL_BRANCH = 1;
+const unsigned char DEFAULT_PREDICTION = 1;
+const BtbEntry DEFAULT_BTB_ENTRY = {0,0,0};
 
 void usage(char *baseName);
 void simulate(std::string filePath, unsigned int pbSize,
@@ -82,6 +84,13 @@ void usage(char *baseName) {
     std::cerr << "\tBTB_SIZE: size of taget buffer (power of 2)" << std::endl;
 
 }
+
+template <class T>
+void initialize(T array[], int size, T elem) {
+    for(int i = 0; i < size; i++)
+        array[i] = elem;
+}
+
 void simulate(std::string filePath, unsigned int pbSize,
               unsigned int btbSize, bool verbose) {
     std::ifstream traceFile;
@@ -89,6 +98,9 @@ void simulate(std::string filePath, unsigned int pbSize,
     BranchStats stats = {0};
     unsigned char predictions[pbSize];
     BtbEntry btb[btbSize];
+    
+    initialize(predictions, pbSize, DEFAULT_PREDICTION);
+    initialize(btb, btbSize, DEFAULT_BTB_ENTRY);
     
     traceFile.open(filePath.c_str(), std::ifstream::in);
     if (traceFile.fail()) {
