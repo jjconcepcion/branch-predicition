@@ -21,10 +21,17 @@ typedef struct BranchStatistics {
     unsigned int misprediction;
 } BranchStats;
 
+typedef struct BranchTargetBufferEntry {
+    unsigned int tag;
+    unsigned int targetAddress;
+    bool valid;
+} BtbEntry;
+
 const unsigned short CONDITIONAL_BRANCH = 1;
 
 void usage(char *baseName);
-void simulate(std::string filePath, bool verbose);
+void simulate(std::string filePath, unsigned int pbSize,
+              unsigned int btbSize, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats);
@@ -58,7 +65,7 @@ int main(int argc, char *argv[]) {
     pbSize = atoi(argv[optind + 1]);
     btbSize = atoi(argv[optind + 2]);
     
-    simulate(traceFilePath, vflag);
+    simulate(traceFilePath, pbSize, btbSize, vflag);
     
     return 0;
 }
@@ -75,11 +82,13 @@ void usage(char *baseName) {
     std::cerr << "\tBTB_SIZE: size of taget buffer (power of 2)" << std::endl;
 
 }
-
-void simulate(std::string filePath, bool verbose) {
+void simulate(std::string filePath, unsigned int pbSize,
+              unsigned int btbSize, bool verbose) {
     std::ifstream traceFile;
     std::string line;
     BranchStats stats = {0};
+    unsigned char predictions[pbSize];
+    BtbEntry btb[btbSize];
     
     traceFile.open(filePath.c_str(), std::ifstream::in);
     if (traceFile.fail()) {
