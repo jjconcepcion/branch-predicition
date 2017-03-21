@@ -40,6 +40,7 @@ void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats);
 void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
+uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -130,6 +131,16 @@ void simulate(std::string filePath, uint32_t pbSize,
     traceFile.close();
 
     printSummary(&stats);
+}
+
+uint32_t bufferIndex(uint32_t bufferSize, uint32_t address) {
+    uint32_t index, nbits;
+
+    nbits = log2(bufferSize);
+    index = address << (32 - nbits - 2);
+    index >>= (32 - nbits);
+
+    return index;
 }
 
 void parseLine(std::string *line, TraceInfo *trace) {
