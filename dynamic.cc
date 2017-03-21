@@ -3,27 +3,28 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <cstdint>
 #include <unistd.h> // getopt()
 
 typedef struct TraceLineDetail {
-    unsigned int programCounter;
+    uint32_t programCounter;
     unsigned short branchType;
-    unsigned int targetAddress;
+    uint32_t targetAddress;
     bool branchTaken;
 } TraceInfo;
 
 typedef struct BranchStatistics {
-    unsigned int branches;
-    unsigned int forward;
-    unsigned int forwardTaken;
-    unsigned int backward;
-    unsigned int backwardTaken;
-    unsigned int misprediction;
+    uint32_t branches;
+    uint32_t forward;
+    uint32_t forwardTaken;
+    uint32_t backward;
+    uint32_t backwardTaken;
+    uint32_t misprediction;
 } BranchStats;
 
 typedef struct BranchTargetBufferEntry {
-    unsigned int tag;
-    unsigned int targetAddress;
+    uint32_t tag;
+    uint32_t targetAddress;
     bool valid;
 } BtbEntry;
 
@@ -32,8 +33,8 @@ const unsigned char DEFAULT_PREDICTION = 1;
 const BtbEntry DEFAULT_BTB_ENTRY = {0,0,0};
 
 void usage(char *baseName);
-void simulate(std::string filePath, unsigned int pbSize,
-              unsigned int btbSize, bool verbose);
+void simulate(std::string filePath, uint32_t pbSize,
+              uint32_t btbSize, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats);
@@ -43,8 +44,8 @@ int main(int argc, char *argv[]) {
     std::string traceFilePath;
     bool vflag = false;   // verbose mode flag
     int option;
-    unsigned int pbSize;    // size of prediction buffer
-    unsigned int btbSize;  // size of branch target buffer
+    uint32_t pbSize;    // size of prediction buffer
+    uint32_t btbSize;  // size of branch target buffer
     
     // parse command line args
     while ((option = getopt(argc, argv, "v")) != -1) {
@@ -91,8 +92,8 @@ void initialize(T array[], int size, T elem) {
         array[i] = elem;
 }
 
-void simulate(std::string filePath, unsigned int pbSize,
-              unsigned int btbSize, bool verbose) {
+void simulate(std::string filePath, uint32_t pbSize,
+              uint32_t btbSize, bool verbose) {
     std::ifstream traceFile;
     std::string line;
     BranchStats stats = {0};
