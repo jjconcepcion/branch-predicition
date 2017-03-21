@@ -11,6 +11,9 @@ typedef struct TraceLineDetail {
     unsigned short branchType;
     uint32_t targetAddress;
     bool branchTaken;
+    uint32_t predictionIndex;
+    unsigned char currentPrediction;
+    unsigned char nextPrediction;
 } TraceInfo;
 
 typedef struct BranchStatistics {
