@@ -39,6 +39,7 @@ void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats);
 void printSummary(BranchStats *stats);
+uint32_t log2(uint32_t x);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -90,6 +91,14 @@ template <class T>
 void initialize(T array[], int size, T elem) {
     for(int i = 0; i < size; i++)
         array[i] = elem;
+}
+
+uint32_t log2(uint32_t x) {
+    uint32_t retval = 0;
+    while( x>>= 1) {
+        retval++;
+    }
+    return retval;
 }
 
 void simulate(std::string filePath, uint32_t pbSize,
