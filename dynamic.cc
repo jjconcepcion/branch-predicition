@@ -173,17 +173,17 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     
     /*
      * Check the prediction for the current branch instruction. When branch
-     * taken, check the branch target against the BTB, and record the BTB
+     * taken, check the branch tag against the BTB, and record the BTB
      * hits and misses. Do nothing if branch is not taken.
      */
     trace->predictionIndex = bufferIndex(predictionBuffer.size(), 
-                                        trace->targetAddress);
+                                        trace->programCounter);
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
-                                 trace->targetAddress);
+                                 trace->programCounter);
     trace->currentPrediction = predictionBuffer[trace->predictionIndex];
     if(predictTaken(trace->currentPrediction)) {
         addressLowOrderBits = log2(predictionBuffer.size()) + BITS_WITHIN_WORD;
-        tag = trace->targetAddress >> addressLowOrderBits;
+        tag = trace->programCounter >> addressLowOrderBits;
         btbEntry = branchTargetBuffer[trace->btbIndex];
 
         if(validTag(tag, btbEntry))
