@@ -16,6 +16,7 @@ typedef struct TraceLineDetail {
     unsigned char currentPrediction;
     unsigned char nextPrediction;
     uint32_t btbIndex;
+    uint32_t btbTag;
 } TraceInfo;
 
 typedef struct BranchStatistics {
@@ -249,6 +250,9 @@ void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
     std::cout << (int) trace.currentPrediction << " ";
     std::cout << (int) trace.nextPrediction << " ";
     std::cout << trace.btbIndex << " ";
+    std::cout.setf(std::ios::hex, std::ios::basefield);
+    std::cout << trace.btbTag << " ";
+    std::cout.unsetf(std::ios::hex);
     std::cout << stats.btbHit << " ";
     std::cout << stats.btbMiss << std::endl;
 }
