@@ -92,7 +92,7 @@ void usage(char *baseName) {
     std::cerr << "\tTRACE_FILE: path to trace file" << std::endl;
     std::cerr << "\tPB_SIZE: size of prediction buffer (power of 2)";
     std::cerr << std::endl;
-    std::cerr << "\tBTB_SIZE: size of taget buffer (power of 2)" << std::endl;
+    std::cerr << "\tBTB_SIZE: size of target buffer (power of 2)" << std::endl;
 
 }
 
