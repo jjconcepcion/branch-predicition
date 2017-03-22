@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdint>
+#include <vector>
 #include <unistd.h> // getopt()
 
 typedef struct TraceLineDetail {
@@ -44,8 +45,8 @@ void simulate(std::string filePath, uint32_t pbSize,
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats,
-              unsigned char predictionBuffer[],
-              BtbEntry branchTargetBuffer[] );
+              std::vector<unsigned char> predictionBuffer,
+              std::vector<BtbEntry> branchTargetBuffer);
 void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
@@ -96,12 +97,6 @@ void usage(char *baseName) {
 
 }
 
-template <class T>
-void initialize(T array[], int size, T elem) {
-    for(int i = 0; i < size; i++)
-        array[i] = elem;
-}
-
 uint32_t log2(uint32_t x) {
     uint32_t retval = 0;
     while( x>>= 1) {
@@ -115,11 +110,8 @@ void simulate(std::string filePath, uint32_t pbSize,
     std::ifstream traceFile;
     std::string line;
     BranchStats stats = {0};
-    unsigned char predictions[pbSize];
-    BtbEntry btb[btbSize];
-    
-    initialize(predictions, pbSize, DEFAULT_PREDICTION);
-    initialize(btb, btbSize, DEFAULT_BTB_ENTRY);
+    std::vector<unsigned char> predictions (pbSize, DEFAULT_PREDICTION);
+    std::vector<BtbEntry> btb (btbSize, DEFAULT_BTB_ENTRY);
     
     traceFile.open(filePath.c_str(), std::ifstream::in);
     if (traceFile.fail()) {
@@ -163,8 +155,8 @@ void parseLine(std::string *line, TraceInfo *trace) {
 }
 
 void evaluate(TraceInfo *trace, BranchStats *stats,
-              unsigned char predictionBuffer[],
-              BtbEntry branchTargetBuffer[] ) {
+              std::vector<unsigned char> predictionBuffer,
+              std::vector<BtbEntry> branchTargetBuffer) {
     if(trace->branchType != CONDITIONAL_BRANCH) {
         return;
     }
