@@ -14,6 +14,7 @@ typedef struct TraceLineDetail {
     uint32_t predictionIndex;
     unsigned char currentPrediction;
     unsigned char nextPrediction;
+    uint32_t btbIndex;
 } TraceInfo;
 
 typedef struct BranchStatistics {
@@ -23,6 +24,8 @@ typedef struct BranchStatistics {
     uint32_t backward;
     uint32_t backwardTaken;
     uint32_t misprediction;
+    uint32_t btbHit;
+    uint32_t btbMiss;
 } BranchStats;
 
 typedef struct BranchTargetBufferEntry {
