@@ -50,7 +50,8 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
 void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
-
+void printVerboseMessages(TraceInfo &trace, BranchStats &stats);
+    
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
     bool vflag = false;   // verbose mode flag
@@ -125,7 +126,7 @@ void simulate(std::string filePath, uint32_t pbSize,
         evaluate(&trace, &stats, predictions, btb);
         
         if (verbose && trace.branchType == CONDITIONAL_BRANCH) {
-            std::cout << line << std::endl;
+            printVerboseMessages(trace, stats);
         }
     }
     traceFile.close();
@@ -233,4 +234,13 @@ void printSummary(BranchStats *stats) {
     cout << stats->backwardTaken << endl;
     cout << "Number of mispredictions = ";
     cout << stats->misprediction << " " << mispredicitonRate << endl;
+}
+
+void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
+    std::cout << std::hex << trace.predictionIndex << " ";
+    std::cout << (int) trace.currentPrediction << " ";
+    std::cout << (int) trace.nextPrediction << " ";
+    std::cout << trace.btbIndex << " ";
+    std::cout << stats.btbHit << " ";
+    std::cout << stats.btbMiss << std::endl;
 }
