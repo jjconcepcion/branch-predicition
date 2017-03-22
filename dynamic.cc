@@ -178,7 +178,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
                                         trace->targetAddress);
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
                                  trace->targetAddress);
-    trace->currentPrediction = predictionBuffer[trace-predictionIndex];
+    trace->currentPrediction = predictionBuffer[trace->predictionIndex];
     if(predictTaken(trace->currentPrediction)) {
         addressLowOrderBits = log2(predictionBuffer.size()) + 2;
         tag = trace->targetAddress >> addressLowOrderBits;
@@ -189,7 +189,8 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
         else
             stats->btbMiss++;
     }
-    
+
+
     branchTaken = trace->branchTaken;
     forwardBranch = (trace->programCounter < trace->targetAddress);
     backwardBranch = !forwardBranch;
