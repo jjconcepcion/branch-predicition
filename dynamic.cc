@@ -184,11 +184,12 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
                                  trace->programCounter);
     trace->currentPrediction = predictionBuffer[trace->predictionIndex];
-    if (predictTaken(trace->currentPrediction)) {
-        addressLowOrderBits = log2(predictionBuffer.size()) + BITS_WITHIN_WORD;
-        tag = trace->programCounter >> addressLowOrderBits;
-        btbEntry = branchTargetBuffer[trace->btbIndex];
 
+    addressLowOrderBits = log2(branchTargetBuffer.size()) + BITS_WITHIN_WORD;
+    tag = trace->programCounter >> addressLowOrderBits;
+    btbEntry = branchTargetBuffer[trace->btbIndex];
+
+    if (predictTaken(trace->currentPrediction)) {
         if(validTag(tag, btbEntry))
             stats->btbHit++;
         else
@@ -201,6 +202,14 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     forwardBranch = (trace->programCounter < trace->targetAddress);
     backwardBranch = !forwardBranch;
 
+    // update BTB
+    if (trace->branchTaken) {
+        branchTargetBuffer[trace->btbIndex].tag = tag;
+        branchTargetBuffer[trace->btbIndex].valid = true;
+    }
+    trace->btbTag = branchTargetBuffer[trace->btbIndex].tag;
+
+    // record branch statistics
     stats->branches += 1;
     if (forwardBranch) {
         stats->forward += 1;
@@ -218,6 +227,8 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
             stats->misprediction += 1;
         }
     }
+    
+    
 }
 
 void printSummary(BranchStats *stats) {
