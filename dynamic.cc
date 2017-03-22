@@ -264,7 +264,7 @@ void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
     std::cout.setf(std::ios::hex, std::ios::basefield);
     std::cout << trace.btbTag << " ";
     std::cout.unsetf(std::ios::hex);
-    std::cout << stats.btbHit << " ";
+    std::cout << stats.btbHit + stats.btbMiss << " ";
     std::cout << stats.btbMiss << std::endl;
 }
 
