@@ -51,7 +51,9 @@ void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
 void printVerboseMessages(TraceInfo &trace, BranchStats &stats);
-    
+void updatePrediction(std::vector<unsigned char> &predictionBuffer,
+                      TraceInfo &trace);
+
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
     bool vflag = false;   // verbose mode flag
@@ -181,7 +183,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
                                  trace->programCounter);
     trace->currentPrediction = predictionBuffer[trace->predictionIndex];
-    if(predictTaken(trace->currentPrediction)) {
+    if (predictTaken(trace->currentPrediction)) {
         addressLowOrderBits = log2(predictionBuffer.size()) + BITS_WITHIN_WORD;
         tag = trace->programCounter >> addressLowOrderBits;
         btbEntry = branchTargetBuffer[trace->btbIndex];
@@ -192,6 +194,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
             stats->btbMiss++;
     }
 
+    updatePrediction(predictionBuffer, *trace);
 
     branchTaken = trace->branchTaken;
     forwardBranch = (trace->programCounter < trace->targetAddress);
@@ -243,4 +246,30 @@ void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
     std::cout << trace.btbIndex << " ";
     std::cout << stats.btbHit << " ";
     std::cout << stats.btbMiss << std::endl;
+}
+
+void updatePrediction(std::vector<unsigned char> &predictionBuffer,
+                      TraceInfo &trace) {
+    unsigned char prediction, newPrediction;
+    bool branchTaken;
+
+    prediction = trace.currentPrediction;
+    branchTaken = trace.branchTaken;
+
+    // Wrong predictions
+    if ((prediction == 0 || prediction == 1) && branchTaken)
+        newPrediction = prediction + 1;
+    else if ((prediction == 3 || prediction == 2) && !branchTaken)
+        newPrediction = prediction - 1;
+    // Correct predictions
+    else if (prediction == 2 && branchTaken)
+        newPrediction = prediction + 1;
+    else if (prediction == 1 && !branchTaken)
+        newPrediction = prediction - 1;
+    // Correct prediction and keep same prediction state
+    else
+        newPrediction = prediction;
+
+    //record change
+    predictionBuffer[trace.predictionIndex] = trace.nextPrediction = newPrediction;
 }
