@@ -122,8 +122,6 @@ void simulate(std::string filePath, uint32_t pbSize,
     while(std::getline(traceFile, line)) {
         TraceInfo trace;
         parseLine(&line, &trace);
-        trace.predictionIndex = bufferIndex(pbSize, trace.targetAddress);
-        trace.btbIndex = bufferIndex(btbSize, trace.targetAddress);
         evaluate(&trace, &stats, predictions, btb);
         
         if (verbose && trace.branchType == CONDITIONAL_BRANCH) {
@@ -160,10 +158,16 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     if(trace->branchType != CONDITIONAL_BRANCH) {
         return;
     }
+    bool branchTaken, forwardBranch, backwardBranch;
     
-    bool branchTaken = trace->branchTaken;
-    bool forwardBranch = (trace->programCounter < trace->targetAddress);
-    bool backwardBranch = !forwardBranch;
+    trace->predictionIndex = bufferIndex(predictionBuffer.size(), 
+                                        trace->targetAddress);
+    trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
+                                 trace->targetAddress);
+
+    branchTaken = trace->branchTaken;
+    forwardBranch = (trace->programCounter < trace->targetAddress);
+    backwardBranch = !forwardBranch;
 
     stats->branches += 1;
     if (forwardBranch) {
