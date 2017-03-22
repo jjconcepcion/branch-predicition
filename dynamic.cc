@@ -240,6 +240,9 @@ void printSummary(BranchStats *stats) {
 }
 
 void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
+    static int order = 0;
+    std::cout << order << " ";
+    order += 1;
     std::cout << std::hex << trace.predictionIndex << " ";
     std::cout << (int) trace.currentPrediction << " ";
     std::cout << (int) trace.nextPrediction << " ";
