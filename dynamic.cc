@@ -38,6 +38,7 @@ typedef struct BranchTargetBufferEntry {
 const unsigned short CONDITIONAL_BRANCH = 1;
 const unsigned char DEFAULT_PREDICTION = 1;
 const BtbEntry DEFAULT_BTB_ENTRY = {0,0,0};
+const int BITS_WITHIN_WORD = 2;
 
 void usage(char *baseName);
 void simulate(std::string filePath, uint32_t pbSize,
@@ -136,7 +137,7 @@ uint32_t bufferIndex(uint32_t bufferSize, uint32_t address) {
     uint32_t index, nbits;
 
     nbits = log2(bufferSize);
-    index = address << (32 - nbits - 2);
+    index = address << (32 - nbits - BITS_WITHIN_WORD);
     index >>= (32 - nbits);
 
     return index;
@@ -180,7 +181,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
                                  trace->targetAddress);
     trace->currentPrediction = predictionBuffer[trace->predictionIndex];
     if(predictTaken(trace->currentPrediction)) {
-        addressLowOrderBits = log2(predictionBuffer.size()) + 2;
+        addressLowOrderBits = log2(predictionBuffer.size()) + BITS_WITHIN_WORD;
         tag = trace->targetAddress >> addressLowOrderBits;
         btbEntry = branchTargetBuffer[trace->btbIndex];
 
