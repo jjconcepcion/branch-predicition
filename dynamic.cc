@@ -151,6 +151,14 @@ void parseLine(std::string *line, TraceInfo *trace) {
     sstream >> std::dec >> trace->branchTaken;
 }
 
+bool predictTaken(unsigned char prediction) {
+    return (prediction == 2 || prediction == 3);
+}
+
+bool validTag(uint32_t tag, BtbEntry &entry) {
+    return (entry.valid && tag == entry.tag);
+}
+
 void evaluate(TraceInfo *trace, BranchStats *stats,
               std::vector<unsigned char> &predictionBuffer,
               std::vector<BtbEntry> &branchTargetBuffer) {
@@ -158,12 +166,29 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
         return;
     }
     bool branchTaken, forwardBranch, backwardBranch;
+    uint32_t tag, addressLowOrderBits;
+    BtbEntry btbEntry;
     
+    /*
+     * Check the prediction for the current branch instruction. When branch
+     * taken, check the branch target against the BTB, and record the BTB
+     * hits and misses. Do nothing if branch is not taken.
+     */
     trace->predictionIndex = bufferIndex(predictionBuffer.size(), 
                                         trace->targetAddress);
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
                                  trace->targetAddress);
+    trace->currentPrediction = predictionBuffer[trace-predictionIndex];
+    if(predictTaken(trace->currentPrediction)) {
+        addressLowOrderBits = log2(predictionBuffer.size()) + 2;
+        tag = trace->targetAddress >> addressLowOrderBits;
+        btbEntry = branchTargetBuffer[trace->btbIndex];
 
+        if(validTag(tag, btbEntry))
+            stats->btbHit++;
+        else
+            stats->btbMiss++;
+    }
     
     branchTaken = trace->branchTaken;
     forwardBranch = (trace->programCounter < trace->targetAddress);
