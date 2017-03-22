@@ -45,8 +45,8 @@ void simulate(std::string filePath, uint32_t pbSize,
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats,
-              std::vector<unsigned char> predictionBuffer,
-              std::vector<BtbEntry> branchTargetBuffer);
+              std::vector<unsigned char> &predictionBuffer,
+              std::vector<BtbEntry> &branchTargetBuffer);
 void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
@@ -153,8 +153,8 @@ void parseLine(std::string *line, TraceInfo *trace) {
 }
 
 void evaluate(TraceInfo *trace, BranchStats *stats,
-              std::vector<unsigned char> predictionBuffer,
-              std::vector<BtbEntry> branchTargetBuffer) {
+              std::vector<unsigned char> &predictionBuffer,
+              std::vector<BtbEntry> &branchTargetBuffer) {
     if(trace->branchType != CONDITIONAL_BRANCH) {
         return;
     }
