@@ -43,7 +43,6 @@ void usage(char *baseName);
 void simulate(std::string filePath, uint32_t pbSize,
               uint32_t btbSize, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
-void printLine(TraceInfo *trace);
 void evaluate(TraceInfo *trace, BranchStats *stats,
               std::vector<unsigned char> &predictionBuffer,
               std::vector<BtbEntry> &branchTargetBuffer);
@@ -165,6 +164,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     trace->btbIndex = bufferIndex(branchTargetBuffer.size(),
                                  trace->targetAddress);
 
+    
     branchTaken = trace->branchTaken;
     forwardBranch = (trace->programCounter < trace->targetAddress);
     backwardBranch = !forwardBranch;
