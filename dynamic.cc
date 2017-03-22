@@ -233,10 +233,13 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
 
 void printSummary(BranchStats *stats) {
     using namespace std;
-    double mispredicitonRate;
+    double mispredicitonRate, btbMissRate;
 
     mispredicitonRate = static_cast<double>(stats->misprediction)
         / stats->branches;
+
+    btbMissRate = static_cast<double>(stats->btbMiss)
+        / (stats->btbMiss + stats->btbHit);
 
     cout << "Number of branches = " << stats->branches << endl;
     cout << "Number of forward branches = ";
@@ -249,6 +252,8 @@ void printSummary(BranchStats *stats) {
     cout << stats->backwardTaken << endl;
     cout << "Number of mispredictions = ";
     cout << stats->misprediction << " " << mispredicitonRate << endl;
+    cout << "Number of BTB misses = ";
+    cout << stats->btbMiss << " " << btbMissRate << endl;
 }
 
 void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
