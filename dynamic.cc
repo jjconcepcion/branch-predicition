@@ -43,7 +43,9 @@ void simulate(std::string filePath, uint32_t pbSize,
               uint32_t btbSize, bool verbose);
 void parseLine(std::string *line, TraceInfo *trace);
 void printLine(TraceInfo *trace);
-void evaluate(TraceInfo *trace, BranchStats *stats);
+void evaluate(TraceInfo *trace, BranchStats *stats,
+              unsigned char predictionBuffer[],
+              BtbEntry branchTargetBuffer[] );
 void printSummary(BranchStats *stats);
 uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
@@ -128,7 +130,9 @@ void simulate(std::string filePath, uint32_t pbSize,
     while(std::getline(traceFile, line)) {
         TraceInfo trace;
         parseLine(&line, &trace);
-        evaluate(&trace, &stats);
+        trace.predictionIndex = bufferIndex(pbSize, trace.targetAddress);
+        trace.btbIndex = bufferIndex(btbSize, trace.targetAddress);
+        evaluate(&trace, &stats, predictions, btb);
         
         if (verbose && trace.branchType == CONDITIONAL_BRANCH) {
             std::cout << line << std::endl;
@@ -158,11 +162,13 @@ void parseLine(std::string *line, TraceInfo *trace) {
     sstream >> std::dec >> trace->branchTaken;
 }
 
-void evaluate(TraceInfo *trace, BranchStats *stats) {
+void evaluate(TraceInfo *trace, BranchStats *stats,
+              unsigned char predictionBuffer[],
+              BtbEntry branchTargetBuffer[] ) {
     if(trace->branchType != CONDITIONAL_BRANCH) {
         return;
     }
-
+    
     bool branchTaken = trace->branchTaken;
     bool forwardBranch = (trace->programCounter < trace->targetAddress);
     bool backwardBranch = !forwardBranch;
