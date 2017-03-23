@@ -99,7 +99,6 @@ void usage(char *baseName) {
     std::cerr << "\tPB_SIZE: size of prediction buffer (power of 2)";
     std::cerr << std::endl;
     std::cerr << "\tBTB_SIZE: size of target buffer (power of 2)" << std::endl;
-
 }
 
 uint32_t log2(uint32_t x) {
