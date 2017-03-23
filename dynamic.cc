@@ -25,7 +25,8 @@ typedef struct BranchStatistics {
     uint32_t forwardTaken;
     uint32_t backward;
     uint32_t backwardTaken;
-    uint32_t misprediction;
+    uint32_t predictCorrect;
+    uint32_t predictIncorrect;
     uint32_t btbHit;
     uint32_t btbMiss;
 } BranchStats;
@@ -53,7 +54,7 @@ uint32_t log2(uint32_t x);
 uint32_t bufferIndex(uint32_t bufferSize, uint32_t address);
 void printVerboseMessages(TraceInfo &trace, BranchStats &stats);
 void updatePrediction(std::vector<unsigned char> &predictionBuffer,
-                      TraceInfo &trace);
+                      TraceInfo &trace, BranchStats &stats);
 
 int main(int argc, char *argv[]) {
     std::string traceFilePath;
@@ -196,7 +197,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
             stats->btbMiss++;
     }
 
-    updatePrediction(predictionBuffer, *trace);
+    updatePrediction(predictionBuffer, *trace, *stats);
 
     branchTaken = trace->branchTaken;
     forwardBranch = (trace->programCounter < trace->targetAddress);
@@ -216,15 +217,12 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
 
         if (branchTaken) {
             stats->forwardTaken += 1;
-            stats->misprediction += 1;
         }
     } else if (backwardBranch) {
         stats->backward += 1;
 
         if (branchTaken) {
             stats->backwardTaken += 1;
-        } else {
-            stats->misprediction += 1;
         }
     }
     
@@ -235,8 +233,8 @@ void printSummary(BranchStats *stats) {
     using namespace std;
     double mispredicitonRate, btbMissRate;
 
-    mispredicitonRate = static_cast<double>(stats->misprediction)
-        / stats->branches;
+    mispredicitonRate = static_cast<double>(stats->predictIncorrect)
+        / (stats->predictCorrect + stats->predictIncorrect);
 
     btbMissRate = static_cast<double>(stats->btbMiss)
         / (stats->btbMiss + stats->btbHit);
@@ -251,7 +249,7 @@ void printSummary(BranchStats *stats) {
     cout << "Number of backward taken branches = ";
     cout << stats->backwardTaken << endl;
     cout << "Number of mispredictions = ";
-    cout << stats->misprediction << " " << mispredicitonRate << endl;
+    cout << stats->predictIncorrect << " " << mispredicitonRate << endl;
     cout << "Number of BTB misses = ";
     cout << stats->btbMiss << " " << btbMissRate << endl;
 }
@@ -274,7 +272,7 @@ void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
 }
 
 void updatePrediction(std::vector<unsigned char> &predictionBuffer,
-                      TraceInfo &trace) {
+                      TraceInfo &trace, BranchStats &stats) {
     unsigned char prediction, newPrediction;
     bool branchTaken;
 
@@ -282,18 +280,26 @@ void updatePrediction(std::vector<unsigned char> &predictionBuffer,
     branchTaken = trace.branchTaken;
 
     // Wrong predictions
-    if ((prediction == 0 || prediction == 1) && branchTaken)
+    if ((prediction == 0 || prediction == 1) && branchTaken) {
         newPrediction = prediction + 1;
-    else if ((prediction == 3 || prediction == 2) && !branchTaken)
+        stats.predictIncorrect += 1;
+    } else if ((prediction == 3 || prediction == 2) && !branchTaken) {
         newPrediction = prediction - 1;
+        stats.predictIncorrect += 1;
+    }
     // Correct predictions
-    else if (prediction == 2 && branchTaken)
+    else if (prediction == 2 && branchTaken) {
         newPrediction = prediction + 1;
-    else if (prediction == 1 && !branchTaken)
+        stats.predictCorrect += 1;
+    }
+    else if (prediction == 1 && !branchTaken) {
         newPrediction = prediction - 1;
-    // Correct prediction and keep same prediction state
-    else
+        stats.predictCorrect += 1;
+    }// Correct prediction and keep same prediction state
+    else {
         newPrediction = prediction;
+        stats.predictCorrect += 1;
+    }
 
     //record change
     predictionBuffer[trace.predictionIndex] = trace.nextPrediction = newPrediction;
