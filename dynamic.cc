@@ -204,6 +204,8 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
     if (trace->branchTaken) {
         branchTargetBuffer[trace->btbIndex].tag = tag;
         branchTargetBuffer[trace->btbIndex].valid = true;
+        branchTargetBuffer[trace->btbIndex].targetAddress =
+            trace->targetAddress;
     }
     trace->btbTag = branchTargetBuffer[trace->btbIndex].tag;
 
