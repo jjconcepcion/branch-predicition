@@ -116,6 +116,7 @@ void simulate(std::string filePath, uint32_t pbSize,
     BranchStats stats = {0};
     std::vector<unsigned char> predictions (pbSize, DEFAULT_PREDICTION);
     std::vector<BtbEntry> btb (btbSize, DEFAULT_BTB_ENTRY);
+    TraceInfo trace;
     
     traceFile.open(filePath.c_str(), std::ifstream::in);
     if (traceFile.fail()) {
@@ -124,11 +125,12 @@ void simulate(std::string filePath, uint32_t pbSize,
     }
     
     while(std::getline(traceFile, line)) {
-        TraceInfo trace;
         parseLine(&line, &trace);
+        if (trace.branchType != CONDITIONAL_BRANCH) {
+            continue;
+        }
         evaluate(&trace, &stats, predictions, btb);
-        
-        if (verbose && trace.branchType == CONDITIONAL_BRANCH) {
+        if (verbose) {
             printVerboseMessages(trace, stats);
         }
     }
@@ -167,9 +169,6 @@ bool validTag(uint32_t tag, BtbEntry &entry) {
 void evaluate(TraceInfo *trace, BranchStats *stats,
               std::vector<unsigned char> &predictionBuffer,
               std::vector<BtbEntry> &branchTargetBuffer) {
-    if(trace->branchType != CONDITIONAL_BRANCH) {
-        return;
-    }
     bool branchTaken, forwardBranch, backwardBranch;
     uint32_t tag, addressLowOrderBits;
     BtbEntry btbEntry;
