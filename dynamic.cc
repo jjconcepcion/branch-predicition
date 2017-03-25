@@ -1,3 +1,7 @@
+/*
+ * Compile this source with the following command:
+ *      $ g++ -std=c++0x dynamic.cc -o sys2
+ */
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -16,7 +20,7 @@ typedef struct TraceLineDetail {
     unsigned char currentPrediction;
     unsigned char nextPrediction;
     uint32_t btbIndex;
-    uint32_t btbTag;
+    uint32_t tag;
 } TraceInfo;
 
 typedef struct BranchStatistics {
@@ -206,7 +210,7 @@ void evaluate(TraceInfo *trace, BranchStats *stats,
         branchTargetBuffer[trace->btbIndex].targetAddress =
             trace->targetAddress;
     }
-    trace->btbTag = branchTargetBuffer[trace->btbIndex].tag;
+    trace->tag = tag;
 
     // record branch statistics
     stats->branches += 1;
@@ -261,7 +265,7 @@ void printVerboseMessages(TraceInfo &trace, BranchStats &stats) {
     std::cout << (int) trace.nextPrediction << " ";
     std::cout.setf(std::ios::hex, std::ios::basefield);
     std::cout << trace.btbIndex << " ";
-    std::cout << trace.btbTag << " ";
+    std::cout << trace.tag << " ";
     std::cout.unsetf(std::ios::hex);
     std::cout << stats.btbHit + stats.btbMiss << " ";
     std::cout << stats.btbMiss << std::endl;

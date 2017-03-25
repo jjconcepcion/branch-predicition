@@ -1,3 +1,7 @@
+/*
+ * Compile this source with the following commad:
+ *      $ g++ static.cc -o sys1
+ */
 #include <iostream>
 #include <string>
 #include <fstream>
